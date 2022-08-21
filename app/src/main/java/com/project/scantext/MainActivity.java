@@ -9,10 +9,13 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -21,8 +24,11 @@ import android.provider.MediaStore;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.google.android.gms.vision.Frame;
@@ -31,10 +37,13 @@ import com.google.android.gms.vision.text.TextRecognizer;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.File;
+
 public class MainActivity extends AppCompatActivity {
     private EditText mResultEt;
     private ImageView mPreviewIv;
-
+    private ScrollView myscrollview;
+    private Button mbtncopy,mbtngoogle;
     //Permission Code
     private static final int CAMERA_REQUEST_CODE = 200;
     private static final int STORAGE_REQUEST_CODE = 400;
@@ -54,12 +63,90 @@ public class MainActivity extends AppCompatActivity {
 
         mResultEt   = findViewById(R.id.resultEt);
         mPreviewIv  = findViewById(R.id.imageIv);
-
+        mbtncopy = findViewById(R.id.btncopy);
+        mbtngoogle = findViewById(R.id.btngoogle);
+        myscrollview = findViewById(R.id.scrollviewouter);
         //camera permission
         cameraPermission = new String[] {Manifest.permission.CAMERA,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE};
         //storage permission
         storagePermission = new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        mResultEt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                myscrollview.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        View lastChild = myscrollview.getChildAt(myscrollview.getChildCount() - 1);
+                        int bottom = lastChild.getBottom() + myscrollview.getPaddingBottom();
+                        int sy = myscrollview.getScrollY();
+                        int sh = myscrollview.getHeight();
+                        int delta = bottom - (sy + sh);
+                        myscrollview.smoothScrollBy(0, delta);
+                    }
+                }, 200);
+            }
+        });
+        mbtncopy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String text = mResultEt.getText().toString();
+                if(text.length()<=1)
+                Toast.makeText(getApplicationContext(), "text is not present", Toast.LENGTH_SHORT).show();
+                else{
+                    if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+                        android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                        clipboard.setText(text);
+                    } else {
+                        android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                        android.content.ClipData clip = android.content.ClipData.newPlainText("Copied Text", text);
+                        clipboard.setPrimaryClip(clip);
+                    }
+                    Toast.makeText(getApplicationContext(), "Text Copied!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        mbtngoogle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String text = mResultEt.getText().toString();
+                if(text.length()<=1){
+                    Toast.makeText(getApplicationContext(), "Text Not Recognized", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    File fdelete = new File(getFilePath(image_uri));
+
+                    if (fdelete.exists()) {
+                        if (fdelete.delete()) {
+                            Toast.makeText(getApplicationContext(), "FIle deleted", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "FIle not deleted", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+                    intent.putExtra(SearchManager.QUERY, text);
+                    startActivity(intent);
+
+                }
+            }
+        });
+
+    }
+    private String getFilePath(Uri uri) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+
+            int columnIndex = cursor.getColumnIndex(projection[0]);
+            String picturePath = cursor.getString(columnIndex); // returns null
+            cursor.close();
+            return picturePath;
+        }
+        return null;
     }
 
     @Override
@@ -202,6 +289,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             break;
         }
+
+
+
     }
 
     //handle image result
