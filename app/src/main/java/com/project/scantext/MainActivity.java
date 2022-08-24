@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
     private void dialogAbout() {
         new AlertDialog.Builder(this)
                 .setTitle("App Developers")
-                .setMessage("1. Arati Singh \n\n2. Deepanshu Priy Gautam")
+                .setMessage("1. Hrushikesh Patil \n")
                 .setPositiveButton("CLOSE", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
