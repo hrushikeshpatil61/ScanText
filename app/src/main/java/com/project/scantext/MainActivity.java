@@ -2,7 +2,7 @@ package com.project.scantext;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ActionBar actionBar = getSupportActionBar();
+
 
         mResultEt   = findViewById(R.id.resultEt);
         mPreviewIv  = findViewById(R.id.imageIv);
@@ -95,14 +95,9 @@ public class MainActivity extends AppCompatActivity {
                 if(text.length()<=1)
                 Toast.makeText(getApplicationContext(), "text is not present", Toast.LENGTH_SHORT).show();
                 else{
-                    if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
-                        android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                        clipboard.setText(text);
-                    } else {
-                        android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                        android.content.ClipData clip = android.content.ClipData.newPlainText("Copied Text", text);
-                        clipboard.setPrimaryClip(clip);
-                    }
+                    android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                    android.content.ClipData clip = android.content.ClipData.newPlainText("Copied Text", text);
+                    clipboard.setPrimaryClip(clip);
                     Toast.makeText(getApplicationContext(), "Text Copied!", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -171,8 +166,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void dialogAbout() {
         new AlertDialog.Builder(this)
-                .setTitle("App Developers")
-                .setMessage("1. Hrushikesh Patil \n")
+                .setTitle("App Developer")
+                .setMessage("Hrushikesh Patil \n")
                 .setPositiveButton("CLOSE", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
